@@ -1,0 +1,35 @@
+# Large binary/music/image files
+*.wav
+*.ogg
+*.mp3
+*.flac
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.xwb
+*.xsb
+*.bin
+*.dat
+*.ifs
+*.arc
+*.docx
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local samples and generated output
+reference/*
+!reference/.gitkeep
+work/*
+!work/.gitkeep
+otherswork/
+
+# Temporary output
+tmp/
+output/
+dist/
+.codex
