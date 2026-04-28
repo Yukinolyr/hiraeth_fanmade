@@ -25,12 +25,12 @@ music_list release_code: 2024123100
 MonkeyBusiness modules/nostalgia
 ```
 
-## 一键测试包
+## v0.1 测试发布包
 
-当前可用的一键包：
+当前推荐使用的测试发布包：
 
 ```text
-work/fengbei_mb_oneclick_test.zip
+work/hiraeth_fanmade_fengbei_v0.1_test.zip
 ```
 
 解压后推荐直接双击：
@@ -81,6 +81,12 @@ contents/start_fengbei_layeredfs.bat
 ROLLBACK.bat
 ```
 
+发布说明：
+
+```text
+docs/release_fengbei_v0.1_test.md
+```
+
 ## 测试歌曲
 
 风呗测试曲：
@@ -101,7 +107,7 @@ scripts/             分析、转换、装配工具
 docs/                当前研究记录和技术文档
 validate_song.py     歌曲文件夹基础验证器
 reference/           本地样本目录，默认不提交
-work/                本地生成目录；当前强制提交了一键包 zip
+work/                本地生成目录；当前强制提交了 v0.1 测试发布 zip
 ```
 
 ## 重要文档
@@ -159,7 +165,7 @@ python3 validate_song.py work/custom_song_folder
 
 ## 已知限制
 
-- 当前一键包是风呗单曲测试包，不是通用多曲安装器。
+- 当前 v0.1 测试发布包是风呗单曲测试包，不是通用多曲安装器。
 - 当前 index、版本号、路径策略针对已验证的 PAN op.3 测试环境。
 - XSB 仍主要复用或有限 patch，尚未完整重建未知表、GUID、hash。
 - 生成的 XWB 仍以 PCM 工作流为主，ADPCM 生成尚未完成。

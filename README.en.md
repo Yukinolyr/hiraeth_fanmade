@@ -1,8 +1,8 @@
 # Nostalgia Fanmade Tools
 
-Python tools and notes for researching local song, chart, and audio file structures for a music game, with a focus on reproducible, local-only custom chart experiments.
+Python tools and notes for researching local song, chart, audio, `music_list.xml`, LayeredFS, and MonkeyBusiness workflows.
 
-This repository contains tooling and documentation only. It does not include game files, copyrighted music, generated replacement packages, or sample assets.
+This repository contains tooling, documentation, and a current Fengbei v0.1 test release package.
 
 ## Status
 
@@ -13,13 +13,27 @@ Current verified workflow:
 - Pack PCM WAV into simple single-entry XWB banks.
 - Normalize imported `music_score` XML into the observed game chart structure.
 - Validate a song work folder before testing.
-- Use an existing song folder as a test shell while replacing only selected audio/chart files.
+- Add one test song through `data_mods` with IFS LayeredFS and MonkeyBusiness songlist alignment.
+- Launch the game with `spice64.exe -k ifs_hook.dll`; direct `spice64.exe` launch does not load the modded song.
+
+Current test release:
+
+```text
+work/hiraeth_fanmade_fengbei_v0.1_test.zip
+```
+
+Release notes:
+
+```text
+docs/release_fengbei_v0.1_test.md
+```
 
 Known limitations:
 
 - Generated XWB audio is currently PCM. ADPCM XWB generation is not implemented yet.
 - Low sample-rate PCM, such as 16000 Hz, is a temporary workaround for wavebank size limits.
 - XSB GUID/hash/unknown tables are not rebuilt; current workflows reuse existing XSB files or patch visible bank names only.
+- The v0.1 package is a single-song Fengbei test release, not a universal multi-song installer.
 - This project does not bypass DRM, signatures, online checks, anti-cheat, licensing, or integrity systems.
 
 ## Repository Layout
@@ -29,7 +43,7 @@ scripts/             Reproducible inspection, conversion, and assembly tools
 docs/                Notes from local format research and test workflows
 validate_song.py     Song folder validator
 reference/           Local-only samples, ignored by Git
-work/                Local-only generated files and install packages, ignored by Git
+work/                Local generated files; the current v0.1 test release zip is force-tracked
 ```
 
 ## Safety Rules
@@ -79,6 +93,8 @@ python3 scripts/normalize_chart_xml.py input.xml work/test/m_t0168_marigoldjazzy
 - `docs/format_notes.md`: chart XML structure notes.
 - `docs/audio_bank_notes.md`: XSB/XWB observations and audio conversion notes.
 - `docs/music_list_notes.md`: `music_list.xml` parsing and entry notes.
+- `docs/ifs_layeredfs_notes.md`: LayeredFS, `data_mods`, and Fengbei test notes.
+- `docs/chart_xml_requirements.md`: verified chart XML requirements.
 - `docs/validation.md`: validator behavior.
 - `docs/workflow.md`: tested workflows and results.
 
