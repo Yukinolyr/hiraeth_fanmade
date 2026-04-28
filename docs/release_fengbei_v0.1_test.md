@@ -46,6 +46,14 @@ Recommended clean install:
 INSTALL_CLEAN.bat
 ```
 
+Recommended extraction path:
+
+```text
+C:\hiraeth_fengbei_v01
+```
+
+Keeping the extraction path short reduces the chance of Windows path-length copy failures.
+
 Normal install:
 
 ```text
@@ -72,6 +80,8 @@ spice64.exe -k ifs_hook.dll
 
 Directly launching `spice64.exe` will not load the `data_mods` song.
 
+The installer accepts pasted paths with or without surrounding English quotes.
+
 ## Installer Behavior
 
 The clean installer:
@@ -79,6 +89,7 @@ The clean installer:
 - Backs up and clears the target `contents/data_mods`.
 - Installs `contents/data_mods/fbfn`.
 - Backs up and replaces `contents/ifs_hook.dll`.
+- Attempts to unblock `ifs_hook.dll` if Windows marks it as downloaded from the internet.
 - Generates `contents/start_fengbei_layeredfs.bat`.
 - Initializes or merges MonkeyBusiness `modules/nostalgia/music_list.xml`.
 - Merges Fengbei index `701` into the game-side overlay music list.
@@ -104,4 +115,6 @@ In the current test environment:
 - This is a single-song test package.
 - `index=701` is a test assignment, not a final global allocation policy.
 - The package targets the verified PAN op.3 songlist version and MB module layout.
+- The installer expects `spice64.exe` under the selected PAN `contents` folder.
+- The installer expects MonkeyBusiness PAN files under `modules/nostalgia`.
 - Multi-song support still needs manifest handling, index allocation, conflict checks, and version adaptation.
