@@ -34,6 +34,8 @@ TOP_LEVEL_ORDER = [
     "velocity_zone_data",
 ]
 
+MAX_PIANO_SCALE = 88
+
 
 class NormalizeError(ValueError):
     """Raised when a chart cannot be normalized."""
@@ -53,6 +55,10 @@ def set_typed_child(parent: ET.Element, tag: str, type_name: str, value: str) ->
     return child
 
 
+def clamp_piano_scale(value: str) -> str:
+    return str(max(0, min(MAX_PIANO_SCALE, int(value))))
+
+
 def infer_fixed_bpm(root: ET.Element) -> str:
     header = root.find("header")
     if header is None:
@@ -66,7 +72,7 @@ def infer_fixed_bpm(root: ET.Element) -> str:
     return str(value)
 
 
-def normalize_header(root: ET.Element, fixed_bpm: str) -> ET.Element:
+def normalize_header(root: ET.Element, fixed_bpm: str, clamp_scale: bool) -> ET.Element:
     source = root.find("header")
     if source is None:
         raise NormalizeError("header is missing")
@@ -78,11 +84,13 @@ def normalize_header(root: ET.Element, fixed_bpm: str) -> ET.Element:
         copied = copy.deepcopy(child)
         if copied.tag == "first_bpm":
             copied.text = fixed_bpm
+        elif clamp_scale and copied.tag == "max_scale" and copied.text is not None:
+            copied.text = clamp_piano_scale(copied.text)
         header.append(copied)
     return header
 
 
-def normalize_note(source: ET.Element) -> ET.Element:
+def normalize_note(source: ET.Element, clamp_scale: bool, shift_sub_note_track_index: int) -> ET.Element:
     note = ET.Element("note")
     values: dict[str, str] = {}
     for tag, type_name, default in NOTE_FIELDS:
@@ -91,6 +99,8 @@ def normalize_note(source: ET.Element) -> ET.Element:
             value = default
         if tag == "key_kind":
             value = "0"
+        elif clamp_scale and tag == "scale_piano":
+            value = clamp_piano_scale(value)
         values[tag] = value
         set_typed_child(note, tag, type_name, value)
 
@@ -98,6 +108,16 @@ def normalize_note(source: ET.Element) -> ET.Element:
     if sub_note_data is None:
         sub_note_data = ET.Element("sub_note_data")
     sub_note_copy = copy.deepcopy(sub_note_data)
+    if clamp_scale:
+        for sub_note in sub_note_copy.findall("sub_note"):
+            scale = sub_note.find("scale_piano")
+            if scale is not None and scale.text is not None:
+                scale.text = clamp_piano_scale(scale.text)
+    if shift_sub_note_track_index:
+        for sub_note in sub_note_copy.findall("sub_note"):
+            track_index = sub_note.find("track_index")
+            if track_index is not None and track_index.text is not None:
+                track_index.text = str(int(track_index.text) + shift_sub_note_track_index)
     if not sub_note_copy.findall("sub_note"):
         sub_note = ET.SubElement(sub_note_copy, "sub_note")
         set_typed_child(sub_note, "start_timing_msec", "s32", values["start_timing_msec"])
@@ -110,13 +130,13 @@ def normalize_note(source: ET.Element) -> ET.Element:
     return note
 
 
-def normalize_note_data(root: ET.Element) -> ET.Element:
+def normalize_note_data(root: ET.Element, clamp_scale: bool, shift_sub_note_track_index: int) -> ET.Element:
     source = root.find("note_data")
     if source is None:
         raise NormalizeError("note_data is missing")
     note_data = ET.Element("note_data")
     for note in source.findall("note"):
-        note_data.append(normalize_note(note))
+        note_data.append(normalize_note(note, clamp_scale, shift_sub_note_track_index))
     return note_data
 
 
@@ -156,7 +176,12 @@ def indent(elem: ET.Element, level: int = 0) -> None:
         elem.tail = prefix
 
 
-def normalize_chart(input_path: Path, output_path: Path) -> dict[str, str]:
+def normalize_chart(
+    input_path: Path,
+    output_path: Path,
+    clamp_scale: bool = False,
+    shift_sub_note_track_index: int = 0,
+) -> dict[str, str]:
     source_root = ET.parse(input_path).getroot()
     if source_root.tag != "music_score":
         raise NormalizeError(f"Unexpected root: {source_root.tag}")
@@ -164,8 +189,8 @@ def normalize_chart(input_path: Path, output_path: Path) -> dict[str, str]:
     fixed_bpm = infer_fixed_bpm(source_root)
     output_root = ET.Element("music_score")
     elements: dict[str, ET.Element] = {
-        "header": normalize_header(source_root, fixed_bpm),
-        "note_data": normalize_note_data(source_root),
+        "header": normalize_header(source_root, fixed_bpm, clamp_scale),
+        "note_data": normalize_note_data(source_root, clamp_scale, shift_sub_note_track_index),
         "event_data": build_event_data(fixed_bpm),
     }
     for tag in ["beat_data", "track_info", "velocity_zone_data"]:
@@ -185,20 +210,41 @@ def normalize_chart(input_path: Path, output_path: Path) -> dict[str, str]:
         short_empty_elements=True,
     )
     output_path.write_text(text, encoding="utf-8", newline="\n")
-    return {"output": str(output_path), "fixed_bpm": fixed_bpm}
+    return {
+        "output": str(output_path),
+        "fixed_bpm": fixed_bpm,
+        "clamp_scale": str(clamp_scale),
+        "shift_sub_note_track_index": str(shift_sub_note_track_index),
+    }
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Normalize a NOSTALGIA chart XML.")
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument(
+        "--clamp-scale-piano",
+        action="store_true",
+        help="Clamp note and sub_note scale_piano values to 0..88, and clamp header max_scale.",
+    )
+    parser.add_argument(
+        "--shift-sub-note-track-index",
+        type=int,
+        default=0,
+        help="Add this integer to every copied sub_note track_index value.",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     try:
-        result = normalize_chart(args.input, args.output)
+        result = normalize_chart(
+            args.input,
+            args.output,
+            clamp_scale=args.clamp_scale_piano,
+            shift_sub_note_track_index=args.shift_sub_note_track_index,
+        )
     except (OSError, ET.ParseError, NormalizeError, ValueError) as exc:
         print(f"FAIL: {exc}")
         return 1

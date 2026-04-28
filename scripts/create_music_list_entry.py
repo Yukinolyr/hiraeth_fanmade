@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create a work-copy music_list.xml with one cloned music_spec entry."""
+"""Create a work-copy music_list.xml or LayeredFS merged XML entry."""
 
 from __future__ import annotations
 
@@ -71,6 +71,8 @@ def create_entry(
     title: str,
     artist: str,
     levels: str | None,
+    merged: bool,
+    index: str | None,
 ) -> dict[str, str]:
     if not SAFE_BASENAME.fullmatch(new_basename):
         raise MusicListError("New basename must start with M_ and contain only ASCII letters, digits, underscores.")
@@ -84,7 +86,12 @@ def create_entry(
         raise MusicListError(f"Template basename not found: {template_basename}")
 
     new_spec = copy.deepcopy(template)
-    new_spec.set("index", next_index(root))
+    if index is not None:
+        if not index.isdigit():
+            raise MusicListError("Index must be a non-negative integer.")
+        new_spec.set("index", index)
+    else:
+        new_spec.set("index", next_index(root))
     set_text(new_spec, "basename", new_basename)
     set_text(new_spec, "title", title)
     set_text(new_spec, "title_kana", title)
@@ -102,11 +109,17 @@ def create_entry(
         ):
             set_text(new_spec, tag, value)
 
-    root.append(new_spec)
-    indent(root)
+    if merged:
+        output_root = ET.Element(root.tag)
+        output_root.append(new_spec)
+    else:
+        root.append(new_spec)
+        output_root = root
+
+    indent(output_root)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     xml_text = "<?xml version='1.0' encoding='Shift_JIS'?>\n" + ET.tostring(
-        root,
+        output_root,
         encoding="unicode",
         short_empty_elements=True,
     )
@@ -119,11 +132,12 @@ def create_entry(
         "new_index": new_spec.attrib.get("index", ""),
         "title": title,
         "artist": artist,
+        "merged": str(merged),
     }
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Clone one music_spec entry into a work-copy music_list.xml.")
+    parser = argparse.ArgumentParser(description="Clone one music_spec entry into a music_list XML file.")
     parser.add_argument("input", type=Path, help="Input music_list.xml.")
     parser.add_argument("output", type=Path, help="Output music_list.xml under work/.")
     parser.add_argument("--template", required=True, help="Template basename, e.g. M_T0168_marigoldjazzy.")
@@ -131,6 +145,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--title", required=True, help="New title.")
     parser.add_argument("--artist", required=True, help="New artist.")
     parser.add_argument("--levels", help="Optional levels formatted as N/H/E/R.")
+    parser.add_argument(
+        "--merged",
+        action="store_true",
+        help="Output only the cloned entry under <music_list>, for LayeredFS music_list.merged.xml.",
+    )
+    parser.add_argument("--index", help="Optional explicit music_spec index. Useful for merged XML packages.")
     return parser.parse_args()
 
 
@@ -145,6 +165,8 @@ def main() -> int:
             args.title,
             args.artist,
             args.levels,
+            args.merged,
+            args.index,
         )
     except (OSError, MusicListError, ET.ParseError) as exc:
         print(f"FAIL: {exc}")
@@ -152,7 +174,7 @@ def main() -> int:
 
     print(
         "OK: "
-        f"{result['output']} new_index={result['new_index']} "
+        f"{result['output']} new_index={result['new_index']} merged={result['merged']} "
         f"template={result['template_basename']} basename={result['new_basename']}"
     )
     return 0
