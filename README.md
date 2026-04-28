@@ -36,6 +36,12 @@ work/hiraeth_fanmade_fengbei_v0.1_test.zip
 解压后推荐直接双击：
 
 ```text
+CHECK_ENV.bat
+```
+
+确认环境后再执行：
+
+```text
 INSTALL_CLEAN.bat
 ```
 
@@ -48,6 +54,7 @@ INSTALL_CLEAN.bat
 - 初始化或合并 MonkeyBusiness 的 `modules/nostalgia/music_list.xml`
 - 修补 MB `op3_common.py` 的版本号和缺失字段默认值
 - 写入回滚状态
+- 写入 `logs/check_env_*.log`、`logs/install_*.log`、`logs/rollback_*.log`
 
 安装时会要求输入：
 

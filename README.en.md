@@ -22,6 +22,8 @@ Current test release:
 work/hiraeth_fanmade_fengbei_v0.1_test.zip
 ```
 
+The package includes `CHECK_ENV.bat` for read-only pre-install diagnostics and writes `logs/check_env_*.log`, `logs/install_*.log`, and `logs/rollback_*.log`.
+
 Release notes:
 
 ```text

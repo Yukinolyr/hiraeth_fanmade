@@ -43,6 +43,14 @@ data_mods package: fbfn
 Recommended clean install:
 
 ```text
+CHECK_ENV.bat
+```
+
+This performs read-only environment checks and writes a diagnostic log before installation.
+
+Then run:
+
+```text
 INSTALL_CLEAN.bat
 ```
 
@@ -82,10 +90,30 @@ Directly launching `spice64.exe` will not load the `data_mods` song.
 
 The installer accepts pasted paths with or without surrounding English quotes.
 
+## Diagnostics
+
+The package writes logs into its local `logs` folder:
+
+```text
+logs/check_env_*.log
+logs/install_*.log
+logs/rollback_*.log
+```
+
+When a tester reports a failure, ask for the newest relevant log plus:
+
+```text
+MonkeyBusiness-main/fengbei_fbfn_install_state.json
+MonkeyBusiness-main/fengbei_fbfn_backup/<timestamp>
+```
+
+If the game launches but the song is missing or broken, also ask for MonkeyBusiness logs and the game log.
+
 ## Installer Behavior
 
 The clean installer:
 
+- Can be preceded by `CHECK_ENV.bat`, which does not write to game or MonkeyBusiness files.
 - Backs up and clears the target `contents/data_mods`.
 - Installs `contents/data_mods/fbfn`.
 - Backs up and replaces `contents/ifs_hook.dll`.
