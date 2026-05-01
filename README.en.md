@@ -91,6 +91,7 @@ python3 scripts/normalize_chart_xml.py input.xml work/test/m_t0168_marigoldjazzy
 
 ## Documentation
 
+- `docs/mac_codex_handoff.md`: handoff entry point for continuing development from a Mac with Codex.
 - `docs/file_inventory.md`: observed file types and folder contents.
 - `docs/format_notes.md`: chart XML structure notes.
 - `docs/audio_bank_notes.md`: XSB/XWB observations and audio conversion notes.
