@@ -1,0 +1,73 @@
+From c05b5a31bd7b083c6973019ae8d4068b37bb7ec3 Mon Sep 17 00:00:00 2001
+From: Yukino <yukino@local>
+Date: Tue, 23 Jun 2026 17:07:46 +0800
+Subject: [PATCH] Fix CJK font fallback for editor UI
+
+---
+ .gitignore       |  1 +
+ qt_editor/app.py | 23 ++++++++++++++++++++++-
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/.gitignore b/.gitignore
+index ee21c93..fe20a0d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -4,6 +4,7 @@ __pycache__/
+ *.egg-info/
+ .venv/
+ env/
++*.log
+ 
+ # PyInstaller
+ dist/
+diff --git a/qt_editor/app.py b/qt_editor/app.py
+index 1dd6d78..b6cd76a 100644
+--- a/qt_editor/app.py
++++ b/qt_editor/app.py
+@@ -33,7 +33,7 @@ except Exception:
+     # 若無法開檔，繼續但不阻斷啟動
+     pass
+ 
+-from PyQt5.QtGui import QIcon
++from PyQt5.QtGui import QFont, QFontDatabase, QIcon
+ from PyQt5.QtWidgets import QApplication
+ from PyQt5.QtCore import Qt
+ 
+@@ -63,6 +63,23 @@ def _icon_path() -> str:
+         return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icon.png')
+ 
+ 
++def _preferred_ui_font() -> str:
++    """Pick a CJK-capable UI font when the host default lacks Chinese glyphs."""
++    families = set(QFontDatabase().families())
++    for name in (
++        'Microsoft YaHei UI',
++        'Microsoft YaHei',
++        'SimHei',
++        'SimSun',
++        'Noto Sans CJK SC',
++        'Noto Sans CJK TC',
++        'WenQuanYi Zen Hei',
++    ):
++        if name in families:
++            return name
++    return ''
++
++
+ def main() -> None:
+     # 載入設定（語言、捲動方向等）
+     settings.load()
+@@ -73,6 +90,10 @@ def main() -> None:
+     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+ 
+     app = QApplication(sys.argv)
++    ui_font = _preferred_ui_font()
++    if ui_font:
++        app.setFont(QFont(ui_font, 10))
++        app.setStyleSheet(f'* {{ font-family: "{ui_font}"; }}')
+     try:
+         from .i18n import t as _t
+     except Exception:
+-- 
+2.43.0
+

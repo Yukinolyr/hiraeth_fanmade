@@ -20,6 +20,12 @@ git clone https://github.com/xu3545k7/qt_editor.git
 cd qt_editor
 ```
 
+If using the original upstream repository, apply our local CJK font patch from `nostalgia_fanmade`:
+
+```bash
+git apply ../nostalgia_fanmade/patches/qt_editor_cjk_font_fallback.patch
+```
+
 Recommended Python dependencies:
 
 ```bash
@@ -130,4 +136,3 @@ Minimal `metadata.json`:
   "status": "midi_prepared"
 }
 ```
-
