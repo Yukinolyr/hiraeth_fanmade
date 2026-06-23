@@ -1,12 +1,12 @@
-From c05b5a31bd7b083c6973019ae8d4068b37bb7ec3 Mon Sep 17 00:00:00 2001
+From 6f850955671f91c43ed3365577d82ceb2112f239 Mon Sep 17 00:00:00 2001
 From: Yukino <yukino@local>
 Date: Tue, 23 Jun 2026 17:07:46 +0800
 Subject: [PATCH] Fix CJK font fallback for editor UI
 
 ---
- .gitignore       |  1 +
+ .gitignore       |  2 ++
  qt_editor/app.py | 23 ++++++++++++++++++++++-
- 2 files changed, 23 insertions(+), 1 deletion(-)
+ 2 files changed, 24 insertions(+), 1 deletion(-)
 
 diff --git a/.gitignore b/.gitignore
 index ee21c93..fe20a0d 100644
@@ -17,6 +17,7 @@ index ee21c93..fe20a0d 100644
  .venv/
  env/
 +*.log
++workspace/
  
  # PyInstaller
  dist/
@@ -70,4 +71,3 @@ index 1dd6d78..b6cd76a 100644
      except Exception:
 -- 
 2.43.0
-
