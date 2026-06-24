@@ -2,6 +2,12 @@
 
 This is the recommended workflow after the 2026-06-23 cleanup audit. It starts from the verified Fengbei v0.1 package shape and avoids relying on old `work/` experiments.
 
+For the first fully playable local case study, see:
+
+```text
+docs/playable_song_production_hanon_case_study.md
+```
+
 ## Inputs
 
 Prepare these inputs before building a package:
